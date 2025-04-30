@@ -99,7 +99,7 @@ input {
     font-size: 1.1em;
 }
 
-#loginBtn {
+.submit {
     background-image: linear-gradient(to left, #4a5a88, #4b5ace);
     color: white;
     padding: 8px;
@@ -108,7 +108,7 @@ input {
     cursor: pointer;
     font-size: 1.1em;
     margin-top: 8px;
-    width: 100%;
+    width: 90%;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
@@ -121,7 +121,20 @@ input {
     cursor: pointer;
     font-size: 1.1em;
     margin-top: 8px;
-    width: 100%;
+    width: 90%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+#backToLoginBtn{
+    background-image: linear-gradient(to left, #4a5a88, #4b5ace);
+    color: white;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-top: 8px;
+    width: 66%;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
@@ -170,4 +183,41 @@ input[type="text"], input[type="password"], input[type="email"] {
     margin-bottom: 20px;
     border: 3px solid #ffffff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Contêiner da escolha do avatar */
+.avatar-upload {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+}
+
+/* Estilo para o botão de escolher o avatar */
+.choose-avatar-btn {
+    background-image: linear-gradient(to left, #4a5a88, #4b5ace);
+    color: white;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    text-align: center;  /* Centraliza o texto no botão */
+}
+
+/* Estilo para a imagem de pré-visualização do avatar */
+#avatarPreview {
+    margin-bottom: 10px;
+    display: block;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-top: 10px;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    object-fit: cover;  /* Faz com que a imagem preencha o espaço sem distorção */
 }

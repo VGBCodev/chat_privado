@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="PT-BR">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,116 +8,141 @@
     <meta name="author" content="VGB_Codev">
     <title>Chat-Privado</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Chat-Privado</h1>
-    <ul>
-        <li><a class="menu" href="#">Conversas</a></li>
-        <li><a class="menu" href="#">Sobre</a></li>
-        <li><a class="menu" href="#">Ajuda</a></li>
-    </ul>
+    <header>
+        <h1>Chat-Privado</h1>
+        <ul>
+            <li><a class="menu" href="#">Conversas</a></li>
+            <li><a class="menu" href="#">Sobre</a></li>
+            <li><a class="menu" href="#">Ajuda</a></li>
+        </ul>
+    </header>
 
-</header>
+    <div id="authForm">
+        <h2 class="mensagen_de_boas_vindas">Bem-vindo ao Chat-Privado</h2>
+        <p class="texto_login">Faça login ou crie sua conta para começar a conversar!</p>
 
-<!-- Formulário de Cadastro e Login -->
-<div id="authForm">
+        <div class="form-container">
+            <!-- Formulário de Login -->
+            <form id="loginForm">
+                <img src="css2.png" alt="avatar" class="avatar" title="Avatar">
+                <input type="email" id="email" placeholder="Digite seu email" required>
+                <input type="password" id="password" placeholder="Digite sua senha" required>
+                <button type="submit" class="submit">Entrar</button>
+                <button type="button" id="showSignupBtn">Criar nova conta</button>
+            </form>
 
-    <h2 class="mensagen_de_boas_vindas">Bem-vindo ao Chat-Privado</h2>
+            <!-- Formulário de Cadastro -->
+            <form id="signupForm" style="display: none;">
+              <input type="email" id="signupEmail" placeholder="Digite seu email" required>
+              <input type="password" id="signupPassword" placeholder="Digite sua senha" required>
+              
+              <div class="avatar-upload">
+                <!-- Botão para escolher o avatar -->
+                <button type="button" id="chooseAvatarBtn" class="choose-avatar-btn">Escolher Avatar</button>
+                
+                <!-- Campo de upload de arquivo oculto -->
+                <input type="file" id="avatarUpload" accept="image/*" style="display: none;" required>
+                
+                <!-- Imagem de pré-visualização -->
+                <img id="avatarPreview" src="" alt="Avatar Preview" style="display:none; width: 100px; height: 100px; border-radius: 50%; margin-top: 10px; border: 3px solid #ffffff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);">
+              </div>
 
-    <p class="texto_login">Faça login para começar a conversar !</p>
-
-    <div class="form-container">
-        <form id="loginForm">
-            <img src="css2.png" alt="avatar" title="avatar" class="avatar">
-            <input type="email" id="email" placeholder="Digite seu email" required>
-            <input type="password" id="password" placeholder="Digite sua senha" required>
-            <button type="submit" id="loginBtn">Entrar</button>
-            <button type="submit" id="showSignupBtn">Cadastrar</button> 
-        </form>
-        <form id="signupForm" style="display: none;">
-
-            <input type="email" id="signupEmail" placeholder="Digite seu email" required>
-            <input type="password" id="signupPassword" placeholder="Digite sua senha" required>
-                      
-        </form>        
-        <img id="googleBtn" src="icons8-google-logo-48.png" alt=""></img>
+              <button type="submit" class="submit">Cadastrar</button>
+              <button type="button" id="backToLoginBtn" >Voltar para login</button>
+          </form>
+          
+            <!-- Botão Google -->
+            <img id="googleBtn" src="icons8-google-logo-48.png" alt="Entrar com Google" style="cursor:pointer; margin-top: 10px;">
+        </div>
     </div>
-</div>
 
-<!-- Scripts Firebase -->
-<script type="module">
-    // Importações do Firebase (modular)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    <!-- Firebase + Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-    // Configuração do Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyAqAadcmcVI-hYBJjpnxdC4lxwxbZIWZks",
-        authDomain: "chat-privado-60dc3.firebaseapp.com",
-        projectId: "chat-privado-60dc3",
-        storageBucket: "chat-privado-60dc3.firebasestorage.app",
-        messagingSenderId: "513902320586",
-        appId: "1:513902320586:web:ac8d9015403360ccec0d33"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAqAadcmcVI-hYBJjpnxdC4lxwxbZIWZks",
+            authDomain: "chat-privado-60dc3.firebaseapp.com",
+            projectId: "chat-privado-60dc3",
+            storageBucket: "chat-privado-60dc3.appspot.com",
+            messagingSenderId: "513902320586",
+            appId: "1:513902320586:web:ac8d9015403360ccec0d33"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-    // Ação para login com Google
-    document.getElementById("googleBtn").addEventListener("click", () => {
-        signInWithPopup(auth, provider)
-            .then(result => {
-                window.location.href = "chat.html";
-            })
-            .catch(error => {
-                alert("Erro no login com Google: " + error.message);
-            });
-    });
+        // Login com Google
+        document.getElementById("googleBtn").addEventListener("click", () => {
+            signInWithPopup(auth, provider)
+                .then(() => window.location.href = "chat.html")
+                .catch(error => alert("Erro no login com Google: " + error.message));
+        });
 
-    // Ação para login com email e senha
-    document.getElementById("loginForm").addEventListener("submit", (event) => {
-        event.preventDefault();
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+        // Login com email/senha
+        document.getElementById("loginForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
 
-        signInWithEmailAndPassword(auth, email, password)
-            .then(userCredential => {
-                window.location.href = "chat.html";
-            })
-            .catch(error => {
-                alert("Erro no login com email e senha: " + error.message);
-            });
-    });
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => window.location.href = "chat.html")
+                .catch(error => alert("Erro no login: " + error.message));
+        });
 
-        // Ação para cadastro com email e senha
-        document.getElementById("signupForm").addEventListener("submit", (event) => {
-            event.preventDefault();
+        // Cadastro com email/senha
+        document.getElementById("signupForm").addEventListener("submit", (e) => {
+            e.preventDefault();
             const email = document.getElementById("signupEmail").value;
             const password = document.getElementById("signupPassword").value;
 
             createUserWithEmailAndPassword(auth, email, password)
-                .then(userCredential => {
-                    window.location.href = "chat.html"; // Redireciona após o cadastro
-                })
-                .catch(error => {
-                    alert("Erro ao cadastrar: " + error.message);
-                });
+                .then(() => window.location.href = "chat.html")
+                .catch(error => alert("Erro no cadastro: " + error.message));
         });
 
-        // Mostrar formulário de cadastro
+        // Alternar para formulário de cadastro
         document.getElementById("showSignupBtn").addEventListener("click", () => {
-        document.getElementById("loginForm").style.display = "none";
-        document.getElementById("signupForm").style.display = "block";
-      });
+            document.getElementById("loginForm").style.display = "none";
+            document.getElementById("signupForm").style.display = "block";
+        });
 
-    // Exemplo de troca entre formulários de login e cadastro
-    document.getElementById("googleBtn").addEventListener("click", () => {
-        showSignupForm();
-    });
-</script>
+        // Voltar para login
+        document.getElementById("backToLoginBtn").addEventListener("click", () => {
+            document.getElementById("signupForm").style.display = "none";
+            document.getElementById("loginForm").style.display = "block";
+        });
+        
+          // Obtém o botão de escolher avatar e o campo de upload de arquivo
+          const chooseAvatarBtn = document.getElementById("chooseAvatarBtn");
+          const avatarUpload = document.getElementById("avatarUpload");
+          const avatarPreview = document.getElementById("avatarPreview");
 
+          // Quando o botão de escolher avatar for clicado, exibe o campo de arquivo
+          chooseAvatarBtn.addEventListener("click", function() {
+              avatarUpload.click();  // Dispara a ação de escolher o arquivo
+          });
+
+          // Quando o usuário selecionar um arquivo
+          avatarUpload.addEventListener("change", function(event) {
+              const file = event.target.files[0];
+              if (file) {
+                  // Cria um URL temporário para a imagem selecionada
+                  const reader = new FileReader();
+                  reader.onload = function(e) {
+                      // Define o src da imagem de pré-visualização para a URL da imagem selecionada
+                      avatarPreview.src = e.target.result;
+                      avatarPreview.style.display = "block";  // Torna a imagem visível
+                  };
+                  reader.readAsDataURL(file);
+              }
+          });
+
+
+    </script>
 </body>
 </html>
