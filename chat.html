@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="PT-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,6 @@
   <title>Chat</title>
 </head>
 <body class="body">
-  
   <!-- Div do chat que começa oculta -->
   <div id="chatDiv" style="display: none;">
     <p>Bem-vindo, <span id="userNameDisplay"></span></p>
@@ -34,7 +33,7 @@
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
     import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    // Sua configuração do Firebase
+    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAqAadcmcVI-hYBJjpnxdC4lxwxbZIWZks",
       authDomain: "chat-privado-60dc3.firebaseapp.com",
@@ -53,6 +52,7 @@
       if (user) {
         document.getElementById("chatDiv").style.display = "block";  // Exibe a área de chat
         document.getElementById("userNameDisplay").textContent = user.displayName;  // Exibe o nome do usuário
+        carregarMensagens(); // Carrega as mensagens ao acessar o chat
       } else {
         window.location.href = "index.html";  // Redireciona para o login se não estiver logado
       }
