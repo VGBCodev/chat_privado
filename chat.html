@@ -8,13 +8,11 @@
   <meta name="author" content="VGB_Codev">
   <meta name="robots" content="noindex, nofollow">
   <link rel="stylesheet" href="style.css">
-
   <title>Chat</title>
-
 </head>
-
 <body class="body">
   
+  <!-- Div do chat que começa oculta -->
   <div id="chatDiv" style="display: none;">
     <p>Bem-vindo, <span id="userNameDisplay"></span></p>
     <button onclick="logout()">Sair</button>
@@ -26,7 +24,75 @@
       <button onclick="sendMessage()">Enviar</button>
     </div>
   </div>
-  
-  
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    // Sua configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqAadcmcVI-hYBJjpnxdC4lxwxbZIWZks",
+      authDomain: "chat-privado-60dc3.firebaseapp.com",
+      projectId: "chat-privado-60dc3",
+      storageBucket: "chat-privado-60dc3.firebasestorage.app",
+      messagingSenderId: "513902320586",
+      appId: "1:513902320586:web:ac8d9015403360ccec0d33"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Função para mostrar o chat e o nome do usuário
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("chatDiv").style.display = "block";  // Exibe a área de chat
+        document.getElementById("userNameDisplay").textContent = user.displayName;  // Exibe o nome do usuário
+      } else {
+        window.location.href = "index.html";  // Redireciona para o login se não estiver logado
+      }
+    });
+
+    // Função para fazer logout
+    function logout() {
+      signOut(auth).then(() => {
+        window.location.href = "index.html";  // Redireciona para o login após sair
+      }).catch((error) => {
+        console.error("Erro ao fazer logout:", error.message);
+      });
+    }
+
+    // Função para enviar mensagens
+    async function sendMessage() {
+      const message = document.getElementById("messageInput").value;
+      if (message.trim() !== "") {
+        await addDoc(collection(db, "mensagens"), {
+          texto: message,
+          uid: auth.currentUser.uid,
+          timestamp: new Date(),
+        });
+        document.getElementById("messageInput").value = "";  // Limpa o campo de mensagem
+        carregarMensagens();  // Recarrega as mensagens
+      }
+    }
+
+    // Função para carregar as mensagens do Firestore
+    async function carregarMensagens() {
+      const querySnapshot = await getDocs(collection(db, "mensagens"));
+      const messagesDiv = document.getElementById("messages");
+      messagesDiv.innerHTML = "";  // Limpa as mensagens existentes
+      querySnapshot.forEach((doc) => {
+        const messageData = doc.data();
+        const messageElement = document.createElement("p");
+        messageElement.textContent = messageData.texto;
+        messagesDiv.appendChild(messageElement);
+      });
+    }
+  </script>
 </body>
 </html>
