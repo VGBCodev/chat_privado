@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="PT-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Chat privado para conversas seguras e rápidas.">
+    <meta name="keywords" content="chat, privado, mensagens, comunicação, segurança">
+    <meta name="author" content="VGB_Codev">
+    <title>Chat-Privado</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+</head>
+<body>
+    <!DOCTYPE html>
+    <html lang="pt-br">
+    <head>
+      <meta charset="UTF-8">
+      <title>Chat-Privado</title>
+    </head>
+    <body>
+    
+      <header>
+        <h1>Chat-Privado</h1>
+        <p>Seja bem-vindo ao chat privado!</p>
+        <p>Digite sua mensagem abaixo e clique em enviar para começar a conversar!</p>
+    
+        <ul>
+          <li><a class="menu" href="#">Conversas</a></li>
+          <li><a class="menu" href="#">Sobre</a></li>
+          <li><a class="menu" href="#">Ajuda</a></li>
+        </ul>
+    
+        <button id="loginBtn">Entrar com Google</button>
+      </header>
+    
+      <!-- Scripts Firebase -->
+      <script type="module">
+        // Importações do Firebase (modular)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    
+        // Configuração do Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyAqAadcmcVI-hYBJjpnxdC4lxwxbZIWZks",
+          authDomain: "chat-privado-60dc3.firebaseapp.com",
+          projectId: "chat-privado-60dc3",
+          storageBucket: "chat-privado-60dc3.firebasestorage.app",
+          messagingSenderId: "513902320586",
+          appId: "1:513902320586:web:ac8d9015403360ccec0d33"
+        };
+    
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+    
+        // Evento do botão de login
+        document.getElementById("loginBtn").addEventListener("click", () => {
+          signInWithPopup(auth, provider)
+            .then(result => {
+              // Redireciona após login
+              window.location.href = "chat.html";
+            })
+            .catch(error => {
+              alert("Erro no login: " + error.message);
+            });
+        });
+      </script>
+    </body>
+    </html>
+    
+
+</body>
+</html>

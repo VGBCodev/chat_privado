@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Chat privado para conversas seguras e rápidas.">
+  <meta name="keywords" content="chat, privado, mensagens, comunicação, segurança">
+  <meta name="author" content="VGB_Codev">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="style.css">
+
+  <title>Chat</title>
+
+</head>
+<body class="body">
+  
+  <div id="chatDiv" style="display: none;">
+    <p>Bem-vindo, <span id="userNameDisplay"></span></p>
+    <button onclick="logout()">Sair</button>
+  
+    <div class="chat-container">
+      <h2>Inicie uma conversa</h2>
+      <div id="messages" class="messages"></div>
+      <input type="text" id="messageInput" placeholder="Digite sua mensagem aqui...">
+      <button onclick="sendMessage()">Enviar</button>
+    </div>
+  </div>
+  
+  
+</body>
+</html>
