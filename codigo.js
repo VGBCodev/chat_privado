@@ -1,8 +1,7 @@
 // Firebase SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -21,29 +20,35 @@ const app = initializeApp(firebaseConfig);
 // Obter os serviços do Firebase
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
+
+// Habilitar persistência offline do Firestore
+enableIndexedDbPersistence(db)
+  .catch((err) => {
+    if (err.code === 'failed-precondition') {
+      console.log("Falha na persistência offline: mais de uma aba do navegador aberta.");
+    } else if (err.code === 'unimplemented') {
+      console.log("Persistência offline não suportada no navegador.");
+    }
+  });
 
 // FORMULÁRIO DE LOGIN
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const email = document.getElementById("email").value;
   const senha = document.getElementById("password").value;
 
-  console.log("Tentando logar com email:", email);
-
   try {
+    // Realiza o login
     const userCredential = await signInWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
-    console.log("Usuário autenticado:", user);
-
+    // Obter dados do usuário no Firestore
     const docRef = doc(db, "usuarios", user.uid);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
       const userData = docSnap.data();
-      console.log("Dados do usuário encontrados:", userData);
-      
       localStorage.setItem("currentUser", JSON.stringify(userData));
       window.location.href = "chat.html";
     } else {
@@ -52,72 +57,5 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   } catch (error) {
     console.error("Erro no login:", error);
     alert("Erro no login: " + error.message);
-  }
-});
-
-// FORMULÁRIO DE CADASTRO
-document.getElementById("signupForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = document.getElementById("signupEmail").value;
-  const senha = document.getElementById("signupPassword").value;
-  const avatarFile = document.getElementById("avatarUpload").files[0];
-
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
-    const user = userCredential.user;
-
-    console.log("Usuário criado:", user);
-
-    let avatarURL = "";
-    if (avatarFile) {
-      const storageRef = ref(storage, `avatars/${user.uid}/${avatarFile.name}`);
-      const snapshot = await uploadBytes(storageRef, avatarFile);
-      avatarURL = await getDownloadURL(snapshot.ref);
-    }
-
-    const userData = {
-      uid: user.uid,
-      email: user.email,
-      name: user.email.split("@")[0],
-      profileImage: avatarURL,
-      conversations: {}
-    };
-
-    await setDoc(doc(db, "usuarios", user.uid), userData);
-
-    localStorage.setItem("currentUser", JSON.stringify(userData));
-    window.location.href = "chat.html";
-  } catch (error) {
-    console.error("Erro no cadastro:", error);
-    alert("Erro no cadastro: " + error.message);
-  }
-});
-
-// Alternar para formulário de cadastro
-document.getElementById("showSignupBtn").addEventListener("click", () => {
-  document.getElementById("loginForm").style.display = "none";
-  document.getElementById("signupForm").style.display = "block";
-});
-
-// Voltar para login
-document.getElementById("backToLoginBtn").addEventListener("click", () => {
-  document.getElementById("signupForm").style.display = "none";
-  document.getElementById("loginForm").style.display = "block";
-});
-
-// Avatar preview
-const chooseAvatarBtn = document.getElementById("chooseAvatarBtn");
-const avatarUpload = document.getElementById("avatarUpload");
-const avatarPreview = document.getElementById("avatarPreview");
-
-chooseAvatarBtn.addEventListener("click", () => {
-  avatarUpload.click();
-});
-
-avatarUpload.addEventListener("change", () => {
-  const file = avatarUpload.files[0];
-  if (file) {
-    avatarPreview.src = URL.createObjectURL(file);
-    avatarPreview.style.display = "block";
   }
 });
