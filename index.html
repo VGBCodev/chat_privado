@@ -19,50 +19,49 @@
         </ul>
     </header>
 
-    <div id="authForm">
-        <h2 class="mensagen_de_boas_vindas">Bem-vindo ao Chat-Privado</h2>
-        <p class="texto_login">Faça login ou crie sua conta para começar a conversar!</p>
-
-        <div class="form-container">
-            <!-- Formulário de Login -->
-            <form id="loginForm">
-                <div class="mascote">
-                  <img src="" alt="avatar" class="avatar" title="Avatar">               
-                  <img src="mao-esquerda.png" class="mao esquerda" alt="Mão esquerda">
-                  <img src="mao-direita.png" class="mao direita" alt="Mão direita">
-                </div>
-                <input type="email" id="email" placeholder="Digite seu email" required>
-                <input type="password" id="password" placeholder="Digite sua senha" required>
-                <button type="submit" class="submit">Entrar</button>
-                <button type="button" id="showSignupBtn">Criar nova conta</button>
-            </form>
-
-            <!-- Formulário de Cadastro -->
-            <form id="signupForm" style="display: none;">
-              <input type="email" id="signupEmail" placeholder="Digite seu email" required>
-              <input type="password" id="signupPassword" placeholder="Digite sua senha" required>
-              
-              <div class="avatar-upload">
-                <!-- Botão para escolher o avatar -->
-                <button type="button" id="chooseAvatarBtn" class="choose-avatar-btn">Escolher Avatar</button>
-                
-                <!-- Campo de upload de arquivo oculto -->
-                <input type="file" id="avatarUpload" accept="image/*" style="display: none;" required>
-                
-                <!-- Imagem de pré-visualização -->
-                <img id="avatarPreview" src="" alt="Avatar Preview" style="display:none; width: 100px; height: 100px; border-radius: 50%; margin-top: 10px; border: 3px solid #ffffff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);">
-              </div>
-
-              <button type="submit" class="submit">Cadastrar</button>
-              <button type="button" id="backToLoginBtn" >Voltar para login</button>
-          </form>
-          
-            <!-- Botão Google -->
-            <img id="googleBtn" src="icons8-google-logo-48.png" alt="Entrar com Google" style="cursor:pointer; margin-top: 10px;">
+    <main>
+        <div id="authForm">
+            <h2 class="mensagen_de_boas_vindas">Bem-vindo ao Chat-Privado</h2>
+            <p class="texto_login">Faça login ou crie sua conta para começar a conversar!</p>
+            <div class="form-container">
+                <!-- Formulário de Login -->
+                <form id="loginForm">
+                    <div class="mascote">
+                      <img src="" alt="avatar" class="avatar" title="Avatar">
+                      <img src="mao-esquerda.png" class="mao esquerda" alt="Mão esquerda">
+                      <img src="mao-direita.png" class="mao direita" alt="Mão direita">
+                    </div>
+                    <input type="email" id="email" placeholder="Digite seu email" required>
+                    <input type="password" id="password" placeholder="Digite sua senha" required>
+                    <button type="submit" class="submit">Entrar</button>
+                    <button type="button" id="showSignupBtn">Criar nova conta</button>
+                </form>
+                <!-- Formulário de Cadastro -->
+                <form id="signupForm" style="display: none;">
+                    <input type="email" id="signupEmail" placeholder="Digite seu email" required>
+                    <input type="password" id="signupPassword" placeholder="Digite sua senha" required>
+        
+                    <div class="avatar-upload">
+                        <!-- Botão para escolher o avatar -->
+                        <button type="button" id="chooseAvatarBtn" class="choose-avatar-btn">Escolher Avatar</button>
+        
+                        <!-- Campo de upload de arquivo oculto -->
+                        <input type="file" id="avatarUpload" accept="image/*" style="display: none;" required>
+        
+                        <!-- Imagem de pré-visualização -->
+                        <img id="avatarPreview" src="" alt="Avatar Preview" style="display:none; width: 100px; height: 100px; border-radius: 50%; margin-top: 10px; border: 3px solid #ffffff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);">
+                    </div>
+                    <button type="submit" class="submit">Cadastrar</button>
+                    <button type="button" id="backToLoginBtn">Voltar para login</button>
+                </form>
+        
+                <!-- Botão Google -->
+                <img id="googleBtn" src="icons8-google-logo-48.png" alt="Entrar com Google" style="cursor:pointer; margin-top: 10px;">
+            </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Firebase + Script -->
+    <!-- Firebase SDK -->
     <script type="module" src="codigo.js"></script>
 </body>
 </html>
