@@ -1,17 +1,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, addDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 // Configuração do Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyAqAadcmcVI-hYBJjpnxdC4lxwxbZIWZks",
-    authDomain: "chat-privado-60dc3.firebaseapp.com",
-    databaseURL: "https://chat-privado-60dc3-default-rtdb.firebaseio.com",
-    projectId: "chat-privado-60dc3",
-    storageBucket: "chat-privado-60dc3.appspot.com",
-    messagingSenderId: "513902320586",
-    appId: "1:513902320586:web:ac8d9015403360ccec0dotnet33"
+    apiKey: "Sua-API-Key",
+    authDomain: "Seu-Auth-Domain",
+    projectId: "Seu-Project-ID",
+    storageBucket: "Seu-Storage-Bucket",
+    messagingSenderId: "Seu-Messaging-Sender-ID",
+    appId: "Seu-App-ID"
 };
 
 // Inicializa o Firebase
@@ -66,6 +65,7 @@ loginForm.addEventListener("submit", async (e) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, senha);
         const user = userCredential.user;
+        console.log("Usuário autenticado:", user.uid);
 
         const docRef = doc(db, "usuarios", user.uid);
         const docSnap = await getDoc(docRef);
@@ -78,8 +78,8 @@ loginForm.addEventListener("submit", async (e) => {
             alert("Usuário não encontrado no banco de dados.");
         }
     } catch (error) {
-        console.error("Erro no login:", error);
-        alert("Erro no login: " + error.message);
+        console.error("Erro no login:", error.code, error.message);
+        alert("Erro no login: " + error.message + " (Código: " + error.code + ")");
     }
 });
 
@@ -93,6 +93,7 @@ signupForm.addEventListener("submit", async (e) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
         const user = userCredential.user;
+        console.log("Usuário cadastrado:", user.uid);
 
         let avatarURL = "";
         if (avatarFile) {
@@ -112,18 +113,20 @@ signupForm.addEventListener("submit", async (e) => {
         localStorage.setItem("currentUser", JSON.stringify(userData));
         window.location.href = "chat.html";
     } catch (error) {
-        console.error("Erro no cadastro:", error);
-        alert("Erro no cadastro: " + error.message);
+        console.error("Erro no cadastro:", error.code, error.message);
+        alert("Erro no cadastro: " + error.message + " (Código: " + error.code + ")");
     }
 });
 
 // Login com Google
 const googleBtn = document.getElementById("googleBtn");
 googleBtn.addEventListener("click", async () => {
+    console.log("Botão Google clicado");
     const provider = new GoogleAuthProvider();
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
+        console.log("Usuário autenticado com Google:", user.uid);
 
         const docRef = doc(db, "usuarios", user.uid);
         const docSnap = await getDoc(docRef);
@@ -137,20 +140,16 @@ googleBtn.addEventListener("click", async () => {
                 createdAt: new Date()
             };
             await setDoc(docRef, userData);
+            console.log("Novo usuário registrado no Firestore");
         } else {
             userData = docSnap.data();
+            console.log("Usuário existente carregado:", userData);
         }
 
         localStorage.setItem("currentUser", JSON.stringify(userData));
         window.location.href = "chat.html";
     } catch (error) {
-        console.error("Erro no login com Google:", error);
-        alert("Erro no login com Google: " + error.message);
+        console.error("Erro no login com Google:", error.code, error.message);
+        alert("Erro no login com Google: " + error.message + " (Código: " + error.code + ")");
     }
 });
-
-// Função de logout
-function signOut() {
-    localStorage.removeItem("currentUser");
-    window.location.href = "index.html"; // Redireciona para a tela de login
-}
