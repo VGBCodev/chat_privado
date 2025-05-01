@@ -5,12 +5,13 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstati
 
 // Configuração do Firebase
 const firebaseConfig = {
-    apiKey: "Sua-API-Key",
-    authDomain: "Seu-Auth-Domain",
-    projectId: "Seu-Project-ID",
-    storageBucket: "Seu-Storage-Bucket",
-    messagingSenderId: "Seu-Messaging-Sender-ID",
-    appId: "Seu-App-ID"
+    apiKey : "AIzaSyAqAadcmcVI-hYBJjpnxdC4lxwxbZIWZks" , 
+    authDomain:"chat-privado-60dc3.firebaseapp.com", 
+    databaseURL:"https://chat-privado-60dc3-default-rtdb.firebaseio.com", 
+    projectId : "chat-privado-60dc3" , 
+    storageBucket : "chat-privado-60dc3.firebasestorage.app" , 
+    messagingSenderId : "513902320586" , 
+    appId: "1:513902320586:web:ac8d9015403360ccec0d33" 
 };
 
 // Inicializa o Firebase
