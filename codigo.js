@@ -1,79 +1,113 @@
-// Dados simulados para usuários
-let mockUsers = {
-    "userID1": {
-        uid: "userID1",
-        email: "joao@example.com",
-        name: "João",
-        profileImage: "",
-        conversations: { "chatID1": true, "chatID2": true }
-    },
-    "userID2": {
-        uid: "userID2",
-        email: "maria@example.com",
-        name: "Maria",
-        profileImage: "",
-        conversations: { "chatID1": true }
-    }
+// Firebase SDK
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+// Configuração do Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAqAadcmcVI-hYBJjpnxdC4lxwxbZIWZks",
+  authDomain: "chat-privado-60dc3.firebaseapp.com",
+  databaseURL: "https://chat-privado-60dc3-default-rtdb.firebaseio.com",
+  projectId: "chat-privado-60dc3",
+  storageBucket: "chat-privado-60dc3.appspot.com",
+  messagingSenderId: "513902320586",
+  appId: "1:513902320586:web:ac8d9015403360ccec0d33"
 };
 
-// Simula o usuário atual (para teste, usamos o usuário João por padrão)
-let currentUser = mockUsers["userID1"];
+// Inicializa o Firebase
+const app = initializeApp(firebaseConfig);
 
-// Login com email/senha (simulado)
-document.getElementById("loginForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = document.getElementById("email").value;
+// Obter os serviços do Firebase
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-    // Simula login: verifica se o email existe nos mockUsers
-    const user = Object.values(mockUsers).find(u => u.email === email);
-    if (user) {
-        currentUser = user;
-        window.location.href = "chat.html";
+// FORMULÁRIO DE LOGIN
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("password").value;
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+    const user = userCredential.user;
+
+    const docRef = doc(db, "usuarios", user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      localStorage.setItem("currentUser", JSON.stringify(userData));
+      window.location.href = "chat.html";
     } else {
-        alert("Email não encontrado. Use joao@example.com ou maria@example.com.");
+      alert("Usuário não encontrado no banco de dados.");
     }
+  } catch (error) {
+    alert("Erro no login: " + error.message);
+  }
 });
 
-// Cadastro com email/senha (simulado)
-document.getElementById("signupForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = document.getElementById("signupEmail").value;
-    const avatarFile = document.getElementById("avatarUpload").files[0];
+// FORMULÁRIO DE CADASTRO
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("signupEmail").value;
+  const senha = document.getElementById("signupPassword").value;
+  const avatarFile = document.getElementById("avatarUpload").files[0];
 
-    // Simula criação de novo usuário
-    const newUserId = `userID${Object.keys(mockUsers).length + 1}`;
-    let avatarURL = avatarFile ? URL.createObjectURL(avatarFile) : "";
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+    const user = userCredential.user;
 
-    mockUsers[newUserId] = {
-        uid: newUserId,
-        email: email,
-        name: email.split("@")[0],
-        profileImage: avatarURL,
-        conversations: {}
+    let avatarURL = "";
+    if (avatarFile) {
+      const storageRef = ref(storage, `avatars/${user.uid}/${avatarFile.name}`);
+      const snapshot = await uploadBytes(storageRef, avatarFile);
+      avatarURL = await getDownloadURL(snapshot.ref);
+    }
+
+    const userData = {
+      uid: user.uid,
+      email: user.email,
+      name: user.email.split("@")[0],
+      profileImage: avatarURL,
+      conversations: {}
     };
 
-    currentUser = mockUsers[newUserId];
+    await setDoc(doc(db, "usuarios", user.uid), userData);
+
+    localStorage.setItem("currentUser", JSON.stringify(userData));
     window.location.href = "chat.html";
+  } catch (error) {
+    alert("Erro no cadastro: " + error.message);
+  }
 });
 
 // Alternar para formulário de cadastro
 document.getElementById("showSignupBtn").addEventListener("click", () => {
-    document.getElementById("loginForm").style.display = "none";
-    document.getElementById("signupForm").style.display = "block";
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("signupForm").style.display = "block";
 });
 
 // Voltar para login
 document.getElementById("backToLoginBtn").addEventListener("click", () => {
-    document.getElementById("signupForm").style.display = "none";
-    document.getElementById("loginForm").style.display = "block";
+  document.getElementById("signupForm").style.display = "none";
+  document.getElementById("loginForm").style.display = "block";
 });
 
-// Obtém o botão de escolher avatar e o campo de upload de arquivo
+// Avatar preview
 const chooseAvatarBtn = document.getElementById("chooseAvatarBtn");
 const avatarUpload = document.getElementById("avatarUpload");
 const avatarPreview = document.getElementById("avatarPreview");
 
-// Quando o botão de escolher avatar for clicado, exibe o campo de arquivo
-chooseAvatarBtn.addEventListener("click", function () {
-    avatarUpload.click();
+chooseAvatarBtn.addEventListener("click", () => {
+  avatarUpload.click();
+});
+
+avatarUpload.addEventListener("change", () => {
+  const file = avatarUpload.files[0];
+  if (file) {
+    avatarPreview.src = URL.createObjectURL(file);
+    avatarPreview.style.display = "block";
+  }
 });

@@ -1,103 +1,84 @@
-// Dados simulados baseados na estrutura do seu banco de dados
-const mockData = {
-    users: {
-        "userID1": {
-            name: "João",
-            email: "joao@example.com",
-            profileImage: "",
-            conversations: {
-                "chatID1": true,
-                "chatID2": true
-            }
-        },
-        "userID2": {
-            name: "Maria",
-            email: "maria@example.com",
-            profileImage: "",
-            conversations: {
-                "chatID1": true
-            }
-        },
-        "userID3": {
-            name: "Paulo",
-            email: "paulo@example.com",
-            profileImage: "",
-            conversations: {
-                "chatID2": true
-            }
-        },
-        "userID4": {
-            name: "Ana",
-            email: "ana@example.com",
-            profileImage: "",
-            conversations: {
-                "chatID2": true
-            }
-        }
-    },
-    chats: {
-        "chatID1": {
-            type: "private",
-            members: {
-                "userID1": true,
-                "userID2": true
-            },
-            lastMessage: {
-                text: "Oi, como você está?",
-                senderID: "userID1",
-                timestamp: "2025-05-01T12:00:00Z"
-            }
-        },
-        "chatID2": {
-            type: "group",
-            title: "Amigos",
-            members: {
-                "userID1": true,
-                "userID3": true,
-                "userID4": true
-            },
-            lastMessage: {
-                text: "Vamos sair hoje?",
-                senderID: "userID3",
-                timestamp: "2025-05-01T12:05:00Z"
-            }
-        }
-    },
-    messages: {
-        "chatID1": [
-            {
-                messageID: "messageID1",
-                text: "Oi, como você está?",
-                senderID: "userID1",
-                timestamp: "2025-05-01T12:00:00Z"
-            },
-            {
-                messageID: "messageID2",
-                text: "Tudo bem, e contigo?",
-                senderID: "userID2",
-                timestamp: "2025-05-01T12:01:00Z"
-            }
-        ],
-        "chatID2": [
-            {
-                messageID: "messageID1",
-                text: "Vamos sair hoje?",
-                senderID: "userID3",
-                timestamp: "2025-05-01T12:05:00Z"
-            }
-        ]
+// Firebase SDK
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// Configuração do Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyAqAadcmcVI-hYBJjpnxdC4lxwxbZIWZks",
+    authDomain: "chat-privado-60dc3.firebaseapp.com",
+    databaseURL: "https://chat-privado-60dc3-default-rtdb.firebaseio.com",
+    projectId: "chat-privado-60dc3",
+    storageBucket: "chat-privado-60dc3.appspot.com",
+    messagingSenderId: "513902320586",
+    appId: "1:513902320586:web:ac8d9015403360ccec0d33"
+};
+
+// Inicializa o Firebase
+const app = initializeApp(firebaseConfig);
+
+// Obter o Firestore e Auth
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Função para carregar mensagens em tempo real de um chat
+function loadMessages(chatId, currentUserId) {
+    const messagesDiv = document.getElementById("messages");
+    messagesDiv.innerHTML = ""; // Limpa as mensagens atuais
+
+    const messagesRef = collection(db, "chats", chatId, "messages");
+    const messagesQuery = query(messagesRef, orderBy("timestamp"));
+
+    // Escuta as mensagens em tempo real
+    onSnapshot(messagesQuery, (querySnapshot) => {
+        querySnapshot.forEach(doc => {
+            const messageData = doc.data();
+            const messageElement = document.createElement("p");
+            const senderName = messageData.senderID === currentUserId ? "Você" : messageData.senderName || "Desconhecido";
+            messageElement.classList.add("message", messageData.senderID === currentUserId ? "sent" : "received");
+            messageElement.innerHTML = `<strong>${senderName}:</strong> ${messageData.text}`;
+            messagesDiv.appendChild(messageElement);
+        });
+
+        // Mantém o scroll na parte inferior
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+}
+
+// Função para enviar uma nova mensagem para o Firestore
+function sendMessage() {
+    const messageInput = document.getElementById("messageInput");
+    const messageText = messageInput.value.trim();
+    const selectedChat = document.querySelector(".chat-item.active");
+
+    if (messageText && selectedChat) {
+        const chatId = selectedChat.dataset.chatId;
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        
+        // Adiciona a nova mensagem ao Firestore
+        addDoc(collection(db, "chats", chatId, "messages"), {
+            text: messageText,
+            senderID: currentUser.uid,
+            senderName: currentUser.name,
+            timestamp: new Date()
+        });
+
+        // Limpa o campo de texto
+        messageInput.value = "";
     }
-};
+}
 
-// Simula o usuário atual (João por padrão)
-const currentUserId = "userID1";
+// Adiciona o evento de clique ao botão de enviar
+document.querySelector(".enviar").addEventListener("click", sendMessage);
 
-// Carrega as conversas ao abrir a página
-window.onload = () => {
-    loadConversations(currentUserId);
-};
+// Permite enviar mensagem ao pressionar Enter
+document.getElementById("messageInput").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        sendMessage();
+    }
+});
 
-// Função para carregar as conversas do usuário
+// Função para carregar conversas do usuário (exemplo simples de seleção de chat)
 function loadConversations(userId) {
     const chatList = document.querySelector(".chat-list");
     chatList.innerHTML = ""; // Limpa a lista de conversas
@@ -125,78 +106,3 @@ function getChatName(chatData, currentUserId) {
     }
     return "Grupo Sem Nome";
 }
-
-// Função para carregar as mensagens de um chat
-function loadMessages(chatId, currentUserId) {
-    const messagesDiv = document.getElementById("messages");
-    messagesDiv.innerHTML = ""; // Limpa as mensagens atuais
-
-    const messages = mockData.messages[chatId] || [];
-
-    // Exibe as mensagens
-    messages.forEach(messageData => {
-        const messageElement = document.createElement("p");
-        const senderName = mockData.users[messageData.senderID]?.name || "Desconhecido";
-        messageElement.classList.add("message", messageData.senderID === currentUserId ? "sent" : "received");
-        messageElement.innerHTML = `<strong>${senderName}:</strong> ${messageData.text}`;
-        messagesDiv.appendChild(messageElement);
-    });
-
-    // Mantém o scroll na parte inferior
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-// Função para enviar uma nova mensagem
-function sendMessage() {
-    const messageInput = document.getElementById("messageInput");
-    const messageText = messageInput.value.trim();
-    const selectedChat = document.querySelector(".chat-item.active");
-
-    if (messageText && selectedChat) {
-        const chatId = selectedChat.dataset.chatId;
-
-        // Adiciona a nova mensagem aos dados mock
-        if (!mockData.messages[chatId]) {
-            mockData.messages[chatId] = [];
-        }
-        mockData.messages[chatId].push({
-            messageID: `messageID${mockData.messages[chatId].length + 1}`,
-            text: messageText,
-            senderID: currentUserId,
-            timestamp: new Date().toISOString()
-        });
-
-        // Atualiza o último mensagem no chat
-        mockData.chats[chatId].lastMessage = {
-            text: messageText,
-            senderID: currentUserId,
-            timestamp: new Date().toISOString()
-        };
-
-        messageInput.value = ""; // Limpa o campo de texto
-        loadMessages(chatId, currentUserId); // Recarrega as mensagens
-    }
-}
-
-// Adiciona o evento de clique ao botão de enviar
-document.querySelector(".enviar").addEventListener("click", sendMessage);
-
-// Permite enviar mensagem ao pressionar Enter
-document.getElementById("messageInput").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-        sendMessage();
-    }
-});
-
-// Função para destacar a conversa selecionada
-document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("chat-item")) {
-        document.querySelectorAll(".chat-item").forEach(item => item.classList.remove("active"));
-        e.target.classList.add("active");
-    }
-});
-
-// Simula logout
-window.signOut = function () {
-    window.location.href = "index.html";
-};
