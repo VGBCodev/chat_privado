@@ -29,21 +29,28 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const email = document.getElementById("email").value;
   const senha = document.getElementById("password").value;
 
+  console.log("Tentando logar com email:", email);
+
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
+
+    console.log("Usuário autenticado:", user);
 
     const docRef = doc(db, "usuarios", user.uid);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
       const userData = docSnap.data();
+      console.log("Dados do usuário encontrados:", userData);
+      
       localStorage.setItem("currentUser", JSON.stringify(userData));
       window.location.href = "chat.html";
     } else {
       alert("Usuário não encontrado no banco de dados.");
     }
   } catch (error) {
+    console.error("Erro no login:", error);
     alert("Erro no login: " + error.message);
   }
 });
@@ -58,6 +65,8 @@ document.getElementById("signupForm").addEventListener("submit", async (e) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
+
+    console.log("Usuário criado:", user);
 
     let avatarURL = "";
     if (avatarFile) {
@@ -79,6 +88,7 @@ document.getElementById("signupForm").addEventListener("submit", async (e) => {
     localStorage.setItem("currentUser", JSON.stringify(userData));
     window.location.href = "chat.html";
   } catch (error) {
+    console.error("Erro no cadastro:", error);
     alert("Erro no cadastro: " + error.message);
   }
 });
