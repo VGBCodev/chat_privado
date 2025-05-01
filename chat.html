@@ -1,34 +1,146 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Privado</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat Privado</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-    <header>
-        <h2 class="h2_chat">Chat Privado</h2>
-        <button onclick="signOut()" class="sair">Sair</button>
-    </header>
+<body style="display: none;">
+  <header>
+    <h2 class="h2_chat">Chat Privado</h2>
+    <button onclick="signOut()" class="sair">Sair</button>
+  </header>
 
-    <main class="main-chat">
-        <aside class="sidebar">
-            <h3>Conversas</h3>
-            <ul class="chat-list"></ul>
-        </aside>
-        
-        <section class="chat-container">
-            <div class="messages" id="messages">
-                <p>Selecione uma conversa para começar.</p>
-            </div>
-            <div class="input-container">
-                <input type="text" id="messageInput" placeholder="Digite sua mensagem..." />
-                <button class="enviar">Enviar</button>
-            </div>
-        </section>
-    </main>
+  <main class="main-chat">
+    <aside class="sidebar">
+      <h3>Conversas</h3>
+      <ul class="chat-list"></ul>
+    </aside>
 
-    <script type="module" src="chatApp.js"></script>
+    <section class="chat-container">
+      <div class="messages" id="messages">
+        <p>Selecione uma conversa para começar.</p>
+      </div>
+      <div class="input-container">
+        <input type="text" id="messageInput" placeholder="Digite sua mensagem..." />
+        <button class="enviar">Enviar</button>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      onSnapshot,
+      addDoc,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAG9_leH8plRn_shdpgTkguS1xECZ7jOlw",
+      authDomain: "chat-privado-d80ea.firebaseapp.com",
+      projectId: "chat-privado-d80ea",
+      storageBucket: "chat-privado-d80ea.appspot.com",
+      messagingSenderId: "384959703301",
+      appId: "1:384959703301:web:0fe16df3d1c632aee02f6c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    function loadConversations(userId) {
+      const chatList = document.querySelector(".chat-list");
+      chatList.innerHTML = "";
+
+      const chatsRef = collection(db, "chats");
+      const q = query(chatsRef, where("members", "array-contains", userId));
+      onSnapshot(q, (querySnapshot) => {
+        chatList.innerHTML = "";
+        querySnapshot.forEach(doc => {
+          const chatData = doc.data();
+          const chatItem = document.createElement("li");
+          chatItem.classList.add("chat-item");
+          chatItem.textContent = chatData.title || "Sem título";
+          chatItem.dataset.chatId = doc.id;
+          chatItem.addEventListener("click", () => loadMessages(doc.id, userId));
+          chatList.appendChild(chatItem);
+        });
+      });
+    }
+
+    function loadMessages(chatId, userId) {
+      const messagesContainer = document.getElementById("messages");
+      messagesContainer.innerHTML = "<p>Carregando mensagens...</p>";
+
+      const messagesRef = collection(db, "chats", chatId, "messages");
+      const q = query(messagesRef, orderBy("timestamp", "asc"));
+      onSnapshot(q, (querySnapshot) => {
+        messagesContainer.innerHTML = "";
+        querySnapshot.forEach(doc => {
+          const messageData = doc.data();
+          const messageElement = document.createElement("p");
+          messageElement.textContent = `${messageData.senderName}: ${messageData.text}`;
+          messagesContainer.appendChild(messageElement);
+        });
+      });
+    }
+
+    function setupSendMessage(currentUser) {
+      const sendButton = document.querySelector(".enviar");
+      sendButton.addEventListener("click", () => {
+        const messageInput = document.getElementById("messageInput");
+        const messageText = messageInput.value.trim();
+        const selectedChat = document.querySelector(".chat-item.active");
+
+        if (messageText === "" || !selectedChat) return;
+
+        const chatId = selectedChat.dataset.chatId;
+
+        addDoc(collection(db, "chats", chatId, "messages"), {
+          text: messageText,
+          senderID: currentUser.uid,
+          senderName: currentUser.name || currentUser.email,
+          timestamp: new Date()
+        });
+
+        messageInput.value = "";
+      });
+
+      // Permite selecionar um chat (adiciona classe "active")
+      document.querySelector(".chat-list").addEventListener("click", (e) => {
+        if (e.target.classList.contains("chat-item")) {
+          document.querySelectorAll(".chat-item").forEach(item => item.classList.remove("active"));
+          e.target.classList.add("active");
+        }
+      });
+    }
+
+    function signOut() {
+      localStorage.removeItem("currentUser");
+      window.location.href = "index.html";
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const localUser = JSON.parse(localStorage.getItem("currentUser"));
+        document.body.style.display = "block";
+        loadConversations(user.uid);
+        setupSendMessage(localUser || user);
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+  </script>
 </body>
 </html>
