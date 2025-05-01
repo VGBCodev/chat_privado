@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, addDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 // Configuração do Firebase
@@ -19,16 +19,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
-
-// Habilitar persistência offline do Firestore
-enableIndexedDbPersistence(db)
-    .catch((err) => {
-        if (err.code === 'failed-precondition') {
-            console.log("Falha na persistência offline: mais de uma aba do navegador aberta.");
-        } else if (err.code === 'unimplemented') {
-            console.log("Persistência offline não suportada no navegador.");
-        }
-    });
 
 // Alternar entre formulários
 const loginForm = document.getElementById("loginForm");
@@ -158,3 +148,9 @@ googleBtn.addEventListener("click", async () => {
         alert("Erro no login com Google: " + error.message);
     }
 });
+
+// Função de logout
+function signOut() {
+    localStorage.removeItem("currentUser");
+    window.location.href = "index.html"; // Redireciona para a tela de login
+}
